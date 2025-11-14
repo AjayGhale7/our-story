@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Our Story — Aju</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+<style>
+  :root{
+    --cinema-bg: linear-gradient(to bottom, rgba(15,10,10,0.25), rgba(5,3,2,0.45));
+    --title-font: 'Playfair Display', serif;
+    --ui-font: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  html,body,#app{height:100%}
+  body{
+    margin:0;
+    font-family:var(--ui-font);
+    background:#0b0b0b;
+    color:#111827;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  .hero-title{
+    font-family:var(--title-font);
+    color:#1f2937;
+    letter-spacing: -0.02em;
+    text-shadow: 0 6px 18px rgba(0,0,0,0.45);
+  }
+
+  .scene {
+    position:relative;
+    width:100%;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .scene .bg {
+    position:absolute;
+    inset:0;
+    background-size:cover;
+    background-position:center;
+    transform-origin:center;
+    will-change:transform,filter;
+    filter: brightness(1.15) contrast(1.05) saturate(1.1);
+  }
+  .scene::after{
+    content:"";
+    position:absolute; inset:0;
+    background: linear-gradient(
+      to bottom,
+      rgba(236, 72, 153, 0.12),
+      rgba(34, 197, 94, 0.15)
+    );
+    pointer-events:none;
+  }
+  .scene .container{
+    position:relative;
+    z-index:5;
+    max-width:900px;
+    padding:48px;
+    color:#111827;
+  }
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.08));
+    border-radius:12px;
+    padding:36px;
+    box-shadow: 0 20px 50px rgba(2,6,23,0.35);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(3px);
+  }
+  h1.title-large{
+    font-size:clamp(28px,5.5vw,56px);
+    margin:0 0 10px 0;
+    color:#0b0b0b;
+    text-align:center;
+  }
+  p.lead{
+    font-family:var(--title-font);
+    font-size:clamp(18px,2.3vw,24px);
+    line-height:1.45;
+    color:#111827;
+    text-align:center;
+  }
+  .top-controls{
+    position:fixed;
+    right:24px;
+    top:18px;
+    z-index:60;
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .control-btn{
+    background: linear-gradient(90deg, rgba(236,72,153,0.95), rgba(34,197,94,0.95));
+    border-radius:8px;
+    padding:8px 12px;
+    cursor:pointer;
+    color:#fff;
+    font-weight:600;
+    box-shadow:0 6px 18px rgba(2,6,23,0.35);
+  }
+  .signature{
+    font-family:var(--title-font);
+    text-align:right;
+    font-size:18px;
+    color:#0b0b0b;
+    margin-top:36px;
+  }
+  @media (max-width:768px){
+    .card{ padding:20px; }
+    .scene .container{ padding:24px; }
+  }
+  .intro-overlay{
+    position:fixed; inset:0; z-index:80; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(180deg,#000,#111);
+    color:#fff; font-family:var(--title-font);
+  }
+  .intro-sub{
+    font-size:16px; opacity:0.85; margin-top:8px; font-family:var(--ui-font);
+  }
+  #playOverlay{
+    position:fixed; inset:0; z-index:110; display:none; align-items:center; justify-content:center;
+    background: linear-gradient(180deg, rgba(3,3,3,0.6), rgba(10,7,6,0.7));
+    backdrop-filter: blur(2px);
+  }
+  #overlayPlayBtn{
+    padding:14px 22px; font-size:18px; border-radius:12px; border:none; cursor:pointer;
+    background: linear-gradient(90deg, rgba(236,72,153,0.95), rgba(34,197,94,0.95));
+    color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  #overlayHint{
+    margin-top:12px; color:rgba(255,255,255,0.9); font-family:var(--ui-font); text-align:center; font-size:14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-controls">
+  <select id="trackSelect" class="control-btn" aria-label="Choose track">
+    <option value="assets/audio/love_main.mp3">Main version</option>
+    <option value="assets/audio/love_slow.mp3">Slow version</option>
+    <option value="assets/audio/love_instrumental.mp3">Instrumental</option>
+  </select>
+  <button id="playBtn" class="control-btn" data-playing="false">Play</button>
+  <button id="muteBtn" class="control-btn">Mute</button>
+</div>
+
+<div id="intro" class="intro-overlay">
+  <div style="text-align:center;">
+    <div class="hero-title" style="font-size:46px; color:#f8efe6;">Our Story</div>
+    <div class="intro-sub">A cinematic journey — scroll to continue</div>
+  </div>
+</div>
+
+<div id="playOverlay" aria-hidden="true">
+  <div style="text-align:center">
+    <button id="overlayPlayBtn">▶ Play background audio</button>
+    <div id="overlayHint">Tap to enable sound for this page</div>
+  </div>
+</div>
+
+<div id="app">
+  <section id="scene1" class="scene">
+    <div class="bg" style="background-image:url('assets/scene1_first_meet.jpg');"></div>
+    <div class="container">
+      <div class="card">
+        <h1 class="title-large hero-title">The First Meet</h1>
+        <p class="lead">The morning light spilled gently through the college gates — soft, golden, and unsure, just like the beginning of something new.
+You didn’t plan to notice her. She didn’t plan to smile back. But somehow, time slowed — a few seconds that the world ignored, but your heart never forgot.
+It wasn’t fireworks; it was a quiet spark. The kind that hums softly but burns for a long time.<br><br>💬 “Some moments don’t begin with words — they start with a glance that feels like home.”</p>
+      </div>
+    </div>
+  </section>
+  <section id="scene2" class="scene">
+    <div class="bg" style="background-image:url('assets/scene2_exam_duty.jpg');"></div>
+    <div class="container">
+      <div class="card">
+        <h1 class="title-large hero-title">Exam Duty</h1>
+        <p class="lead">The classroom was silent — the kind of silence where even breaths felt loud.
+Pages turned, pens moved, and the hum of the old fans filled the air. Yet, between the rows, two glances met.
+He pretended to check papers; she pretended to focus on hers. But the truth was written somewhere between the unspoken and the unseen.
+In a place meant for rules, hearts dared to whisper.<br><br>
+
+💬 “Even in silence, your eyes spoke more than the world ever could.”</p>
+      </div>
+    </div>
+  </section>
+  <section id="scene3" class="scene">
+    <div class="bg" style="background-image:url('assets/scene3_bus_stop.jpg');"></div>
+    <div class="container">
+      <div class="card">
+        <h1 class="title-large hero-title">Bus Stop Talks</h1>
+        <p class="lead">Rain poured gently — not enough to drench, just enough to bring hearts closer.
+The world passed by in a blur of umbrellas, engines, and chatter. But under one umbrella, laughter bloomed.
+Words spilled easily now, smiles came without reason. Maybe it wasn’t just the rain — maybe it was the warmth of finding someone who made you forget it was raining at all.<br><br>
+
+💬 “The world was busy rushing by, but under that umbrella, time slowed just for us.”</p>
+      </div>
+    </div>
+  </section>
+  <section id="scene4" class="scene">
+    <div class="bg" style="background-image:url('assets/scene4_entrance_walk.jpg');"></div>
+    <div class="container">
+      <div class="card">
+        <h1 class="title-large hero-title">Morning Entrance Walk</h1>
+        <p class="lead">The mornings changed.
+The road that once felt ordinary became a ritual — footsteps matching, talks about nothing that somehow meant everything.
+The world still yawned awake, but you two had your own sunrise — quiet, unhurried, full of comfort.
+Sometimes, love doesn’t arrive like a storm; it grows gently, like light finding its way through leaves.<br><br>💬 “Every morning felt new, but your presence made it feel familiar — like a sunrise that waited for me.”</p>
+      </div>
+    </div>
+  </section>
+  <section id="scene5" class="scene">
+    <div class="bg" style="background-image:url('assets/scene5_canteen.jpg');"></div>
+    <div class="container">
+      <div class="card">
+        <h1 class="title-large hero-title">Canteen Moments</h1>
+        <p class="lead">The clatter of trays, the smell of chai, and laughter echoing off the walls.
+Between the noise, your table became its own little world — teasing, jokes, and shared bites of food.
+There was nothing perfect about it, but maybe that’s why it felt so real.
+Happiness was never fancy; it was two people laughing so freely that even time smiled.<br><br>
+
+💬 “Laughter over a plate of food — simple, messy, perfect. Happiness doesn’t need grand plans.”</p>
+      </div>
+    </div>
+  </section>
+  <section id="scene6" class="scene">
+    <div class="bg" style="background-image:url('assets/scene6_library.jpg');"></div>
+    <div class="container">
+      <div class="card">
+        <h1 class="title-large hero-title">Library Silences</h1>
+        <p class="lead">Rows of books, warm afternoon light, and the softest hush imaginable.
+You sat across from each other, pretending to read — but your eyes betrayed you.
+Every page you turned, you hoped she’d look up. Every second she did, your heart forgot the words you’d just read.
+The silence wasn’t empty — it was full of everything you wanted to say but didn’t need to.<br><br>
+
+💬 “We didn’t need to speak — our quiet became the most peaceful sound I’d ever known.”</p>
+      </div>
+    </div>
+  </section>
+  <section id="scene7" class="scene">
+    <div class="bg" style="background-image:url('assets/scene7_confession_night.jpg'); filter: contrast(0.95) brightness(0.85);"></div>
+    <div class="container">
+      <div class="card">
+        <h1 class="title-large hero-title">Confession — September 12</h1>
+        <p class="lead">Rain fell gently that night — two different skies, one heartbeat.
+He stood on the terrace, phone trembling in his hands, rehearsing words he’d already said a hundred times in his head.
+She sat by her window, neon reflections dancing across her face, waiting — part nervous, part knowing.
+When the message came, the world fell quiet. The city lights blurred, the rain softened, and two screens became one world.
+Distance couldn’t dull what was real — it only made the confession echo louder in their hearts.<br><br>
+
+💬 “Two hearts, two worlds, one message — and suddenly the rain didn’t feel cold anymore.”</p>
+      </div>
+    </div>
+  </section>
+  <section id="scene8" class="scene">
+    <div class="bg" style="background-image:url('assets/scene8_october_love.jpg');"></div>
+    <div class="container">
+      <div class="card">
+        <h1 class="title-large hero-title">October — The Month of Love</h1>
+        <p class="lead">The air turned softer, the days slower.
+October wasn’t just a month — it was a feeling. The laughter, the long walks, the sunsets that seemed to wait a little longer just for them.
+Every photo, every glance, every word — a gentle proof that love doesn’t have to be loud to be true.
+It wasn’t perfect, but it was theirs — and that made it beautiful.<br><br>
+
+💬 “It wasn’t the season that changed — it was us, learning what warmth really means.”</p>
+      </div>
+    </div>
+  </section>
+  <section id="scene9" class="scene">
+    <div class="bg" style="background-image:url('assets/scene9_forever_sunset.jpg');"></div>
+    <div class="container">
+      <div class="card">
+        <h1 class="title-large hero-title">Forever — The Promise</h1>
+        <p class="lead">The sun dipped low, painting the world in shades of goodbye and beginning.
+They stood together, hands intertwined, not needing to speak.
+The sky stretched endlessly, as if blessing what they had built — quietly, patiently, truly.
+Maybe forever wasn’t a word, maybe it was this — standing side by side, ready to face everything and still choosing each other.<br><br>
+
+💬 “We stood at the edge of everything we’d been through, and somehow, forever felt real.”</p>
+        <div class="signature">— Aju & Jimikki</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<audio id="bgAudio" loop preload="auto">
+  <source src="assets/audio/love_main.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+  const intro = document.getElementById('intro');
+  const bgAudio = document.getElementById('bgAudio');
+  const playBtn = document.getElementById('playBtn');
+  const muteBtn = document.getElementById('muteBtn');
+  const trackSelect = document.getElementById('trackSelect');
+  const playOverlay = document.getElementById('playOverlay');
+  const overlayPlayBtn = document.getElementById('overlayPlayBtn');
+
+  function setPlayingUI(isPlaying){
+    playBtn.textContent = isPlaying ? 'Pause' : 'Play';
+    playBtn.dataset.playing = isPlaying ? 'true' : 'false';
+  }
+
+  async function tryAutoPlay(){
+    try {
+      await bgAudio.play();
+      playOverlay.style.display = 'none';
+      setPlayingUI(true);
+    } catch (err) {
+      console.warn('Autoplay blocked or failed:', err);
+      playOverlay.style.display = 'flex';
+      setPlayingUI(false);
+    }
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      gsap.to(intro, {opacity:0, duration:1.2, onComplete:()=>{
+        intro.style.display='none';
+        tryAutoPlay();
+      }});
+    }, 1600);
+  });
+
+  overlayPlayBtn.addEventListener('click', async () => {
+    try{
+      bgAudio.muted = false;
+      await bgAudio.play();
+      playOverlay.style.display = 'none';
+      setPlayingUI(true);
+    } catch(err){
+      console.error('Playback failed after user gesture:', err);
+      alert('Playback failed. Please check your audio device or try again.');
+    }
+  });
+
+  trackSelect.addEventListener('change', (e)=>{
+    const src = e.target.value;
+    const wasPlaying = !bgAudio.paused;
+    bgAudio.pause();
+    bgAudio.src = src;
+    bgAudio.load();
+    if(wasPlaying){
+      bgAudio.play().catch(()=>{
+        playOverlay.style.display = 'flex';
+        setPlayingUI(false);
+      });
+    }
+  });
+
+  playBtn.addEventListener('click', async ()=>{
+    if(bgAudio.paused){
+      try{
+        await bgAudio.play();
+        setPlayingUI(true);
+        playOverlay.style.display = 'none';
+      }catch(err){
+        console.warn('Autoplay blocked on play click:', err);
+        playOverlay.style.display = 'flex';
+        setPlayingUI(false);
+      }
+    } else {
+      bgAudio.pause();
+      setPlayingUI(false);
+    }
+  });
+
+  muteBtn.addEventListener('click', ()=>{
+    bgAudio.muted = !bgAudio.muted;
+    muteBtn.textContent = bgAudio.muted ? 'Unmute' : 'Mute';
+  });
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.querySelectorAll('.scene').forEach((scene) => {
+    const bg = scene.querySelector('.bg');
+
+    gsap.fromTo(bg, {y: -80, opacity: 0.7}, {
+      y: 80,
+      opacity: 1,
+      ease: "none",
+      scrollTrigger: {
+        trigger: scene,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 0.9
+      }
+    });
+
+    const container = scene.querySelector('.container');
+    gsap.from(container, {
+      opacity: 0, y: 40, duration: 1.1, ease: "power3.out",
+      scrollTrigger: {
+        trigger: scene,
+        start: "top 75%",
+        toggleActions: "play none none reverse"
+      }
+    });
+  });
+
+  if ('scrollBehavior' in document.documentElement.style) {
+    document.documentElement.style.scrollBehavior = "smooth";
+  }
+
+  bgAudio.src = trackSelect.value;
+  bgAudio.load();
+
+  window.addEventListener('keydown', (e)=>{
+    if(e.code === 'Space'){ e.preventDefault(); playBtn.click(); }
+  });
+</script>
+
+</body>
+</html>
